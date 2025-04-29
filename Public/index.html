@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phone Store</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Welcome to the RED MAGIC store</h1>
+      <nav>
+        <a href="index.html">Accueil</a>
+        <a href="connexion.html">Connexion</a>
+        <a href="admin.html">admin</a>
+        <a href="#contact-client">Service Client</a>
+        <a href="signup.html">signup</a>
+      </nav>
+    </header>
+
+    <main class="main" id="product-container"></main>
+
+    <section class="form-section">
+      <form id="form-inscription">
+        <h2>Inscription</h2>
+        <label for="nom">Nom :</label>
+        <input
+          type="text"
+          id="nom"
+          name="nom"
+          required
+          placeholder="Votre nom"
+        />
+
+        <label for="email">Email :</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          placeholder="Votre email"
+        />
+
+        <label for="mdp">Mot de passe :</label>
+        <input
+          type="password"
+          id="mdp"
+          name="mdp"
+          required
+          placeholder="Mot de passe"
+        />
+
+        <input type="submit" value="S'inscrire" />
+      </form>
+    </section>
+
+    <section id="contact-client">
+      <h2>Contactez notre Service Client</h2>
+      <p>
+        Remplissez le formulaire ci-dessous et notre équipe vous répondra
+        rapidement.
+      </p>
+      <form id="form-contact">
+        <label for="nom-client">Nom :</label>
+        <input
+          type="text"
+          id="nom-client"
+          name="nom-client"
+          placeholder="Votre nom"
+          required
+        />
+
+        <label for="email-client">Email :</label>
+        <input
+          type="email"
+          id="email-client"
+          name="email-client"
+          placeholder="Votre adresse email"
+          required
+        />
+
+        <label for="sujet">Sujet :</label>
+        <select id="sujet" name="sujet" required>
+          <option value="">--Choisissez un sujet--</option>
+          <option value="commande">Problème avec une commande</option>
+          <option value="produit">Question sur un produit</option>
+          <option value="autre">Autre</option>
+        </select>
+
+        <label for="message">Message :</label>
+        <textarea
+          id="message"
+          name="message"
+          rows="5"
+          placeholder="Décrivez votre problème"
+          required
+        ></textarea>
+
+        <input type="submit" value="Envoyer" />
+      </form>
+    </section>
+
+    <footer>
+      <p>Contact : contact@redmagic.com | 01 23 45 67 89</p>
+      <p>&copy; 2024 Red magic. Tous droits réservés.</p>
+    </footer>
+    <script>
+      document
+        .getElementById("form-inscription")
+        ?.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const data = {
+            nom: e.target.nom.value,
+            email: e.target.email.value,
+            mdp: e.target.mdp.value,
+          };
+
+          const res = await fetch("/api/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          const msg = await res.json();
+          alert(msg.message);
+        });
+
+      document
+        .getElementById("form-contact")
+        ?.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const data = {
+            nom: e.target["nom-client"].value,
+            email: e.target["email-client"].value,
+            sujet: e.target.sujet.value,
+            message: e.target.message.value,
+          };
+
+          const res = await fetch("/api/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          const msg = await res.json();
+          alert(msg.message);
+        });
+
+      async function loadProducts() {
+        try {
+          const res = await fetch("/api/products");
+          const products = await res.json();
+          const container = document.getElementById("product-container");
+          container.innerHTML = "";
+
+          products.forEach((product) => {
+            const card = document.createElement("div");
+            card.className = "product-card";
+            card.innerHTML = `
+            <img src="${product.image}" alt="${product.name}" />
+            <div class="info">
+              <h3>${product.name}</h3>
+              <p>${product.description}</p>
+              <div class="price">${Number(product.price).toFixed(2)} €</div>
+              <button class="buy-btn" data-id="${product.id}" data-name="${
+              product.name
+            }" data-price="${product.price}">
+                Acheter
+              </button>
+            </div>
+          `;
+            container.appendChild(card);
+          });
+        } catch (error) {
+          console.error("Erreur lors du chargement des produits :", error);
+        }
+      }
+
+      loadProducts();
+
+      document.addEventListener("click", async (e) => {
+        if (e.target.classList.contains("buy-btn")) {
+          const id = e.target.dataset.id;
+          const title = e.target.dataset.title;
+          const price = e.target.dataset.price;
+
+          const res = await fetch("/api/order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, title, price }),
+          });
+
+          const msg = await res.json();
+          alert(msg.message);
+        }
+      });
+    </script>
+  </body>
+</html>

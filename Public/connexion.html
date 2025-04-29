@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connexion</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Connexion</h1>
+      <nav>
+        <a href="index.html">Accueil</a>
+        <a href="connexion.html">Connexion</a>
+        <a href="admin.html">admin</a>
+        <a href="signup.html">signup</a>
+      </nav>
+    </header>
+
+    <section class="form-section">
+      <form id="form-connexion">
+        <h2>Se connecter</h2>
+        <label for="email">Email :</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          placeholder="Votre email"
+        />
+
+        <label for="mdp">Mot de passe :</label>
+        <input
+          type="password"
+          id="mdp"
+          name="mdp"
+          required
+          placeholder="Mot de passe"
+        />
+
+        <input type="submit" value="Connexion" />
+      </form>
+      <p>
+        <a href="mot_de_passe.html">Mot de passe oublié ?</a>
+      </p>
+    </section>
+
+    <footer>
+      <p>&copy; 2024 Red magic</p>
+    </footer>
+    <script>
+      document
+        .getElementById("form-connexion")
+        ?.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const data = {
+            email: e.target.email.value,
+            mdp: e.target.mdp.value,
+          };
+
+          const res = await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(data),
+          });
+
+          const msg = await res.json();
+          alert(msg.message);
+
+          if (msg.message.toLowerCase().includes("admin")) {
+            window.location.href = "/admin.html";
+          }
+        });
+    </script>
+  </body>
+</html>

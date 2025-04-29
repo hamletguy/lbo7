@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Panneau d'administration</h1>
+      <nav>
+        <a href="index.html">Accueil</a>
+        <a href="connexion.html">Connexion</a>
+        <a href="admin.html">admin</a>
+        <a href="signup.html">signup</a>
+      </nav>
+    </header>
+
+    <section class="form-section">
+      <h2>Ajouter un produit</h2>
+      <form id="add-product-form" enctype="multipart/form-data">
+        <label for="name">Nom du produit :</label>
+        <input type="text" id="name" name="name" required />
+
+        <label for="price">Prix (€) :</label>
+        <input type="number" step="0.01" id="price" name="price" required />
+
+        <label for="description">Description :</label>
+        <textarea id="description" name="description" required></textarea>
+
+        <label for="stock">Stock :</label>
+        <input type="number" id="stock" name="stock" required />
+
+        <label for="image">Image du produit :</label>
+        <input type="file" id="image" name="image" accept="image/*" required />
+
+        <input type="submit" value="Ajouter" />
+      </form>
+    </section>
+
+    <section class="form-section">
+      <h2>Produits en base de données</h2>
+      <ul id="product-list"></ul>
+    </section>
+
+    <footer>
+      <p>&copy; 2024 Cosmétiques Beauté — Admin</p>
+    </footer>
+
+    <script>
+      async function loadProducts() {
+        try {
+          const res = await fetch("/api/products");
+          const products = await res.json();
+
+          if (!Array.isArray(products)) {
+            throw new Error("Format de données invalide");
+          }
+
+          const list = document.getElementById("product-list");
+          list.innerHTML = "";
+
+          products.forEach((p) => {
+            const item = document.createElement("li");
+            const imagePath = p.image
+              ? p.image.startsWith("/")
+                ? p.image
+                : `/images/${p.image}`
+              : "/images/placeholder.jpg";
+
+            item.innerHTML = `
+          <strong>${p.name}</strong> — ${Number(p.price).toFixed(2)} € — ${
+              p.description
+            }
+          <img src="${imagePath}" alt="${
+              p.title
+            }" style="max-width: 300px;margin-left:-10px;">
+          <button onclick="deleteProduct(${
+            p.id
+          })" style="color:white; background:#2563eb; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">
+            Supprimer
+          </button>
+        `;
+            list.appendChild(item);
+          });
+        } catch (error) {
+          list.innerHTML = `<li style="color: red;">Erreur lors du chargement des produits : ${error.message}</li>`;
+          console.error("Erreur lors du chargement des produits:", error);
+        }
+      }
+
+      async function deleteProduct(id) {
+        if (!confirm("Confirmer la suppression de ce produit ?")) return;
+        await fetch("/api/products/" + id, {
+          method: "DELETE",
+        });
+        alert("Produit supprimé !");
+        loadProducts();
+      }
+
+      document
+        .getElementById("add-product-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+
+          try {
+            const response = await fetch("/api/products", {
+              method: "POST",
+              body: formData,
+            });
+            const data = await response.json();
+            if (response.ok) {
+              alert("Produit ajouté avec succès !");
+              e.target.reset();
+              loadProducts();
+            } else {
+              alert("Erreur : " + data.error);
+            }
+          } catch (error) {
+            alert("Erreur : " + error.message);
+          }
+        });
+
+      async function loadOrders() {
+        try {
+          const res = await fetch("/api/orders");
+          const orders = await res.json();
+
+          if (!Array.isArray(orders)) {
+            throw new Error("Format de données invalide");
+          }
+
+          const list = document.getElementById("order-list");
+          list.innerHTML = "";
+
+          orders.forEach((order) => {
+            const item = document.createElement("li");
+            item.innerHTML = `
+          <strong>${order.product_title}</strong> — ${Number(
+              order.price
+            ).toFixed(2)} € 
+          <em>(ID produit: ${order.product_id})</em> — ${new Date(
+              order.created_at
+            ).toLocaleString()}
+        `;
+            list.appendChild(item);
+          });
+        } catch (error) {
+          list.innerHTML = `<li style="color: red;">Erreur lors du chargement des commandes : ${error.message}</li>`;
+          console.error("Erreur lors du chargement des commandes:", error);
+        }
+      }
+
+      loadProducts();
+      loadOrders();
+    </script>
+  </body>
+</html>
