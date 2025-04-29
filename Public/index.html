@@ -28,40 +28,6 @@
 
     <main class="main" id="product-container"></main>
 
-    <section class="form-section">
-      <form id="form-inscription">
-        <h2>Inscription</h2>
-        <label for="nom">Nom :</label>
-        <input
-          type="text"
-          id="nom"
-          name="nom"
-          required
-          placeholder="Votre nom"
-        />
-
-        <label for="email">Email :</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          required
-          placeholder="Votre email"
-        />
-
-        <label for="mdp">Mot de passe :</label>
-        <input
-          type="password"
-          id="mdp"
-          name="mdp"
-          required
-          placeholder="Mot de passe"
-        />
-
-        <input type="submit" value="S'inscrire" />
-      </form>
-    </section>
-
     <section id="contact-client">
       <h2>Contactez notre Service Client</h2>
       <p>
@@ -113,25 +79,6 @@
       <p>&copy; 2024 Red magic. Tous droits réservés.</p>
     </footer>
     <script>
-      document
-        .getElementById("form-inscription")
-        ?.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const data = {
-            nom: e.target.nom.value,
-            email: e.target.email.value,
-            mdp: e.target.mdp.value,
-          };
-
-          const res = await fetch("/api/users", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          });
-          const msg = await res.json();
-          alert(msg.message);
-        });
-
       document
         .getElementById("form-contact")
         ?.addEventListener("submit", async (e) => {
